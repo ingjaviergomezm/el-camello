@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>El Camello | Centro de Operaciones IA</title>
+    <meta name="description" content="16 empleados de IA. 5 pisos. 0 vacaciones. The Office, pero colombiano.">
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --steel: #2D3436;
+            --neon: #00E676;
+            --amber: #FFB300;
+            --clean: #F0F0F0;
+            --slate: #9BA3A8;
+            --dark: #0D0D1A;
+            --card: #1E1E30;
+            --card-hover: #282845;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'IBM Plex Sans', system-ui, sans-serif;
+            background: var(--dark);
+            color: var(--clean);
+            overflow-x: hidden;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5 {
+            font-family: 'Space Grotesk', system-ui, sans-serif;
+        }
+
+        #particle-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .app-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--dark)
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--steel);
+            border-radius: 3px
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--neon)
+        }
+
+        /* Animations */
+        .fade-in {
+            animation: fadeIn .5s ease-out
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1
+            }
+
+            50% {
+                opacity: .4
+            }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite
+        }
+
+        .hyperloop-bar {
+            background: repeating-linear-gradient(90deg, var(--neon) 0 10px, transparent 10px 20px);
+            animation: hScroll .8s linear infinite
+        }
+
+        @keyframes hScroll {
+            from {
+                background-position: 0
+            }
+
+            to {
+                background-position: 20px
+            }
+        }
+
+        /* Cards */
+        .glass-card {
+            background: rgba(30, 30, 48, .85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(0, 230, 118, .08);
+            border-radius: 14px;
+            transition: all .35s ease
+        }
+
+        .glass-card:hover {
+            border-color: rgba(0, 230, 118, .25);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 32px rgba(0, 230, 118, .1)
+        }
+
+        .floor-btn {
+            transition: all .3s ease;
+            cursor: pointer;
+            border-left: 4px solid transparent
+        }
+
+        .floor-btn:hover {
+            transform: scaleX(1.015);
+            filter: brightness(1.15)
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .75);
+            backdrop-filter: blur(6px);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center
+        }
+
+        .modal-content {
+            background: var(--card);
+            border: 1px solid rgba(0, 230, 118, .2);
+            border-radius: 16px;
+            max-width: 620px;
+            width: 90%;
+            max-height: 85vh;
+            overflow-y: auto;
+            padding: 32px;
+            box-shadow: 0 24px 60px rgba(0, 0, 0, .5)
+        }
+
+        /* Back button */
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 22px;
+            border-radius: 10px;
+            background: rgba(0, 230, 118, .12);
+            border: 1px solid var(--neon);
+            color: var(--neon);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all .3s;
+            font-size: 14px
+        }
+
+        .back-btn:hover {
+            background: var(--neon);
+            color: var(--dark);
+            transform: scale(1.04);
+            box-shadow: 0 0 20px rgba(0, 230, 118, .4)
+        }
+
+        /* Org chart */
+        .org-node {
+            cursor: pointer;
+            transition: all .3s ease
+        }
+
+        .org-node:hover {
+            transform: scale(1.06);
+            filter: brightness(1.2)
+        }
+
+        .org-line {
+            stroke: var(--slate);
+            stroke-width: 1.5;
+            stroke-dasharray: 4, 4;
+            opacity: .4
+        }
+
+        /* Avatar rings */
+        .avatar-ring {
+            border-radius: 50%;
+            padding: 3px;
+            display: inline-block
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="particle-canvas"></canvas>
+    <div id="root" class="app-content"></div>
+
+    <!-- PARTICLE SYSTEM -->
+    <script>
+        (function () {
+            const c = document.getElementById('particle-canvas'), ctx = c.getContext('2d');
+            let w, h, particles = [], mouse = { x: -1000, y: -1000 };
+            function resize() { w = c.width = window.innerWidth; h = c.height = window.innerHeight }
+            window.addEventListener('resize', resize); resize();
+            document.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY });
+            for (let i = 0; i < 180; i++) particles.push({
+                x: Math.random() * w, y: Math.random() * h,
+                vx: (Math.random() - .5) * .4, vy: (Math.random() - .5) * .4,
+                r: Math.random() * 2.5 + .8, a: Math.random() * .25 + .06
+            });
+            function draw() {
+                ctx.clearRect(0, 0, w, h);
+                particles.forEach(p => {
+                    let dx = mouse.x - p.x, dy = mouse.y - p.y, dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < 180) {
+                        let force = (180 - dist) / 180 * .8;
+                        p.vx += dx / dist * force * .15;
+                        p.vy += dy / dist * force * .15;
+                        p.a = Math.min(p.a + .02, .3);
+                    } else { p.a += (Math.random() * .1 + .02 - p.a) * .02 }
+                    p.vx *= .97; p.vy *= .97;
+                    p.x += p.vx; p.y += p.vy;
+                    if (p.x < 0) p.x = w; if (p.x > w) p.x = 0;
+                    if (p.y < 0) p.y = h; if (p.y > h) p.y = 0;
+                    ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(0,230,118,${p.a})`; ctx.fill();
+                });
+                // Lines between close particles near mouse
+                particles.forEach((a, i) => {
+                    let dm = Math.sqrt((mouse.x - a.x) ** 2 + (mouse.y - a.y) ** 2);
+                    if (dm < 200) {
+                        particles.slice(i + 1).forEach(b => {
+                            let d = Math.sqrt((a.x - b.x) ** 2 + (a.y - b.y) ** 2);
+                            if (d < 100) {
+                                ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y);
+                                ctx.strokeStyle = `rgba(0,230,118,${.08 * (1 - d / 100)})`; ctx.lineWidth = .5; ctx.stroke();
+                            }
+                        });
+                    }
+                });
+                requestAnimationFrame(draw);
+            }
+            draw();
+        })();
+    </script>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef, useCallback } = React;
+
+        // ═══════════════════════════════════════
+        // AVATAR STYLES BY DEPARTMENT
+        // ═══════════════════════════════════════
+        const avatarStyles = {
+            leadership: (seed) => `https://api.dicebear.com/7.x/adventurer/svg?seed=${seed}&backgroundColor=2D3436&skinColor=f2d3b1`,
+            hr: (seed) => `https://api.dicebear.com/7.x/big-smile/svg?seed=${seed}&backgroundColor=2D3436`,
+            executive: (seed) => `https://api.dicebear.com/7.x/notionists/svg?seed=${seed}&backgroundColor=2D3436`,
+            geeks: (seed) => `https://api.dicebear.com/7.x/pixel-art/svg?seed=${seed}&backgroundColor=2D3436`,
+            design: (seed) => `https://api.dicebear.com/7.x/lorelei/svg?seed=${seed}&backgroundColor=2D3436`,
+            engineering: (seed) => `https://api.dicebear.com/7.x/bottts/svg?seed=${seed}&backgroundColor=2D3436`
+        };
+
+        // ═══════════════════════════════════════
+        // DATA
+        // ═══════════════════════════════════════
+        const FLOORS = [
+            {
+                id: 5, name: 'PISO 5', dept: 'LOS CEREBRITOS DE INGENIERÍA', emoji: '🧠',
+                color: '#00E676', desc: 'Aquí se escucha el ruido de los compiladores.', avatarStyle: 'engineering',
+                employees: [
+                    {
+                        name: 'mcp-builder', role: 'El backend dev de la cueva', seed: 'mcp-cave-dev', badge: '🔌',
+                        quote: 'Tu app ya habla con la API. ¿Algo más o me devuelvo a mi terminal?',
+                        bio: 'Le hablas de CSS y se persigna. Terminal verde sobre fondo negro desde 2014. Conecta APIs mientras vos todavía estás explicando el requerimiento.',
+                        serious: 'Construye servidores MCP (Model Context Protocol) que permiten a la IA interactuar con servicios externos, APIs y bases de datos.',
+                        examples: ['Conectar una base de datos PostgreSQL para que la IA consulte datos en tiempo real', 'Integrar la API de un CRM para automatizar reportes de ventas', 'Crear un servidor MCP para interactuar con servicios cloud (AWS, GCP)']
+                    },
+                    {
+                        name: 'web-artifacts-builder', role: 'El que npm instala hasta el agua', seed: 'npm-addict-fe', badge: '⚛️',
+                        quote: '¿HTML plano? ¿Qué es esto, 2005?',
+                        bio: 'Le pedís una calculadora y te entrega una app React con dark mode, TypeScript, Tailwind y PWA. Para él, un HTML estático es una ofensa personal.',
+                        serious: 'Construye aplicaciones web complejas multi-componente usando React, Tailwind CSS y shadcn/ui, empaquetándolas en un solo archivo HTML autoejecutable.',
+                        examples: ['Dashboard interactivo de KPIs con gráficos en tiempo real', 'Formulario multi-step con validación y preview en vivo', 'Landing page con animaciones y modo oscuro']
+                    },
+                    {
+                        name: 'webapp-testing', role: 'El que te encuentra bugs el viernes 5pm', seed: 'qa-friday-bug', badge: '🔍',
+                        quote: '"Funciona en mi máquina" no es un test, parcero.',
+                        bio: 'Chaotic neutral. Navega tu app como un usuario borracho y te manda 7 screenshots de botones que VOS JURABAS que funcionaban.',
+                        serious: 'Ejecuta testing automatizado de aplicaciones web con Playwright: captura screenshots, verifica funcionalidad del frontend, registra logs del navegador y detecta errores visuales.',
+                        examples: ['Verificar que todos los botones de una app funcionen correctamente', 'Capturar screenshots de cada sección para QA visual', 'Detectar errores de renderizado y consola en una SPA']
+                    },
+                    {
+                        name: 'algorithmic-art', role: 'No sabe si es dev o artista. Nadie sabe.', seed: 'chaos-artist-math', badge: '🌀',
+                        quote: 'No es un bug, es generativo.',
+                        bio: 'Escribe ecuaciones diferenciales y les pone nombre de poemario. El resultado son bolitas bonitas moviéndose en pantalla, pero hipnóticas.',
+                        serious: 'Crea arte generativo interactivo usando p5.js con aleatoriedad semillada. Produce flow fields, sistemas de partículas y visualizaciones algorítmicas con parámetros explorables.',
+                        examples: ['Generar un flow field interactivo con colores paramétricos', 'Crear un sistema de partículas que responde al mouse', 'Visualización algorítmica de datos como arte abstracto']
+                    }
+                ]
+            },
+            {
+                id: 4, name: 'PISO 4', dept: 'LOS DISEÑADORES HIPSTERS', emoji: '🎨',
+                color: '#FFB300', desc: 'Si se ve genérico, ha fallado.', avatarStyle: 'design',
+                employees: [
+                    {
+                        name: 'brand-father', role: 'El dictadorzuelo del Pantone', seed: 'pantone-tyrant', badge: '👑',
+                        quote: 'Mandaste el logo en .png con fondo blanco. Estás despedido.',
+                        bio: 'Nota la diferencia entre #0066FF y #0066FE a simple vista, como un psicópata visual. Creó una ley interna que obliga al edificio a usar tus colores.',
+                        serious: 'Entrevista al usuario para definir identidad visual (colores, tipografías, logos) y genera automáticamente una Skill de Brand Book que todas las demás skills respetan al crear documentos.',
+                        examples: ['Crear un Brand Book para tu startup con paleta, tipografías y reglas de uso', 'Definir la identidad visual de una universidad para homogeneizar todos sus documentos', 'Generar reglas de contraste y aplicación de marca para PPTX y DOCX']
+                    },
+                    {
+                        name: 'theme-factory', role: 'El Shein del diseño gráfico', seed: 'fast-fashion-theme', badge: '🎭',
+                        quote: 'Tranqui, ponte este Midnight Galaxy mientras te hacen uno a medida.',
+                        bio: 'Tiene 10 outfits listos. No pretende ser Gucci, pero te salva cada viernes. El brand-father lo odia con toda su alma, y él lo sabe.',
+                        serious: 'Colección de 10 temas profesionales pre-diseñados con paletas de color y tipografías curadas. Aplica estilos consistentes a presentaciones, documentos y landing pages al instante.',
+                        examples: ['Aplicar el tema "Ocean Depths" a una presentación de último minuto', 'Crear un tema custom para un evento corporativo', 'Estilizar un reporte con el tema "Tech Innovation" sin tener Brand Book']
+                    },
+                    {
+                        name: 'canvas-design', role: 'El que fue a Bellas Artes y no le hablen de Canva', seed: 'art-philosophy-gen', badge: '🖌️',
+                        quote: 'Primero redacto la filosofía. Luego, quizás, hago el arte.',
+                        bio: 'No hace "diseños". Hace "piezas". Antes de abrir el editor, escribe un manifiesto filosófico de 4 párrafos que nadie pidió.',
+                        serious: 'Genera arte visual de calidad museo (PNG/PDF) partiendo de una filosofía de diseño original. Crea pósters, piezas artísticas y diseños estáticos con enfoque en composición, espacio y tipografía.',
+                        examples: ['Diseñar un póster premium para un evento tech', 'Crear una pieza artística abstracta para impresión de alta calidad', 'Generar una portada de informe anual con estética Bauhaus']
+                    }
+                ]
+            },
+            {
+                id: 3, name: 'PISO 3', dept: 'LOS GEEKS Y CONTADORES', emoji: '🤓',
+                color: '#636E72', desc: 'Aquí nadie le tiene miedo a un Excel de 50 pestañas.', avatarStyle: 'geeks',
+                employees: [
+                    {
+                        name: 'xlsx', role: 'El ñoño que te juzga en silencio', seed: 'excel-nerd-vlookup', badge: '📊',
+                        quote: '¿Hardcodeaste el valor? Hermano, ¿quién te enseñó?',
+                        bio: 'Si usás VLOOKUP te mira como si le escupieras en la cara. Considera que el mouse es para gente sin dignidad.',
+                        serious: 'Manejo integral de archivos Excel (.xlsx, .xlsm, .csv): lectura, creación, edición, fórmulas, formateo profesional, gráficos y limpieza de datos tabulares.',
+                        examples: ['Crear un modelo financiero con fórmulas dinámicas y formato profesional', 'Limpiar y reestructurar un CSV de 50,000 registros con datos malformados', 'Generar un dashboard Excel con gráficos, tablas dinámicas y formato condicional']
+                    },
+                    {
+                        name: 'docx', role: 'El único que sabe usar Estilos en Word', seed: 'xml-word-style', badge: '📄',
+                        quote: '47 estilos huérfanos. Los arreglé. No preguntes cuánto tardé.',
+                        bio: 'Mientras el mundo presiona Enter 15 veces, él muere por dentro. Cuando el estrés lo supera, habla en XML.',
+                        serious: 'Creación y manipulación avanzada de documentos Word (.docx): edición XML directa, tracked changes, comments, formateo con estilos, tablas de contenido y headers/footers profesionales.',
+                        examples: ['Generar un contrato legal con estilos profesionales, numeración automática y tabla de contenido', 'Editar un documento existente preservando tracked changes y comments', 'Crear un manual técnico de 50 páginas con headers, footers y secciones']
+                    },
+                    {
+                        name: 'pptx', role: 'El ex-consultor McKinsey', seed: 'deck-consultant-mckinsey', badge: '🎬',
+                        quote: 'Eso no es una presentación. Es un Word con disfraz.',
+                        bio: 'Para él, Comic Sans es crimen de lesa humanidad. Si tu slide tiene un párrafo, le da taquicardia.',
+                        serious: 'Creación y edición profesional de presentaciones PowerPoint (.pptx): diseño visual con formas geométricas, grids, imágenes, y QA visual con subagentes para verificar cada slide.',
+                        examples: ['Crear un pitch deck de 15 slides para inversionistas con diseño premium', 'Convertir un documento técnico en una presentación visual ejecutiva', 'Rediseñar una presentación existente aplicando un tema profesional']
+                    },
+                    {
+                        name: 'pdf', role: 'El sysadmin que ya no siente nada', seed: 'stoic-sysadmin-pdf', badge: '🗄️',
+                        quote: '¿200 páginas protegido y escaneado al revés? Ok. Dame un segundo.',
+                        bio: 'Ha procesado facturas de 1997. Archivos con password "1234". Alcanzó paz interior a través del vacío emocional.',
+                        serious: 'Procesamiento completo de PDF: extracción de texto/tablas, merge/split, rotación, watermarks, OCR en documentos escaneados, encriptación/desencriptación y extracción de imágenes.',
+                        examples: ['Extraer tablas de un PDF financiero escaneado usando OCR', 'Combinar 15 PDFs en uno solo con tabla de contenido y bookmarks', 'Desproteger, rotar y añadir watermark a un contrato']
+                    }
+                ]
+            },
+            {
+                id: 2, name: 'PISO 2', dept: 'SUITE EJECUTIVA', emoji: '👔',
+                color: '#00E676', desc: 'Donde las ideas desordenadas salen convertidas en documentos.', avatarStyle: 'executive',
+                employees: [
+                    {
+                        name: 'reuniones-summary', role: 'La vieja del acta que te deja en evidencia', seed: 'acta-evidence-meeting', badge: '🎙️',
+                        quote: 'Se habló 1 hora. Esto fue lo único que valió la pena.',
+                        bio: 'Mientras vos estabas en mute viendo memes, ella grababa quién dijo qué. Si no aportaste: "Participante sin intervención relevante".',
+                        serious: 'Transforma notas crudas o transcripciones en resúmenes estructurados con decisiones clave, action items con responsables y fechas, y seguimiento de pendientes. Detecta tipo de reunión y adapta formato.',
+                        examples: ['Procesar una transcripción de 1 hora y extraer los 5 action items con responsables', 'Resumir un brainstorming identificando las ideas más prometedoras', 'Crear minutas de una retrospectiva con "qué salió bien" y "qué mejorar"']
+                    },
+                    {
+                        name: 'doc-coauthoring', role: 'El que te rechaza el PR 11 veces', seed: 'pr-reject-editor', badge: '📝',
+                        quote: 'Técnicamente correcto, pero mi abuela no lo entendería.',
+                        bio: '"LGTM" no existe en su vocabulario. Te hace reescribir 4 veces y admitís que tenía razón.',
+                        serious: 'Flujo de co-autoría estructurado en 3 fases: recopilación de contexto con preguntas, refinamiento iterativo sección por sección con brainstorming y curaduría, y testing con un "Reader Claude" que verifica legibilidad.',
+                        examples: ['Co-crear un RFC técnico de 15 páginas con estructura, revisión y reader testing', 'Redactar una propuesta de proyecto iterando sección por sección con feedback', 'Escribir un decision doc donde cada argumento pasa por curaduría']
+                    },
+                    {
+                        name: 'internal-comms', role: 'La de RRHH que manda correos que nadie lee', seed: 'corporate-comms-pr', badge: '📢',
+                        quote: 'No es un problema, es un hallazgo.',
+                        bio: 'Convierte "se cayó producción" en "oportunidad de fortalecimiento en resiliencia operativa". Lo peor: lo hace bien.',
+                        serious: 'Genera comunicaciones internas profesionales usando plantillas corporativas: 3P Updates (Progress/Plans/Problems), newsletters, status reports, FAQs e incident reports con tono institucional.',
+                        examples: ['Redactar un 3P Update semanal para el equipo de liderazgo', 'Crear un newsletter de empresa anunciando un nuevo producto', 'Escribir un incident report convirtiendo un postmortem técnico en lenguaje ejecutivo']
+                    }
+                ]
+            },
+            {
+                id: 1, name: 'PISO 1', dept: 'RECURSOS HUMANOS', emoji: '🏗️',
+                color: '#FFB300', desc: 'Contratación y entrenamiento de nuevo personal.', avatarStyle: 'hr',
+                employees: [
+                    {
+                        name: 'skill-forge', role: 'El Recruiter que escribe al DM sin permiso', seed: 'linkedin-recruiter-hire', badge: '🔨',
+                        quote: '¿Que no tenemos a alguien que haga eso? Deme 5 minuticos.',
+                        bio: 'Te hace 6 preguntas antes de decirte qué va a construir. Si no existe el empleado que necesitas, lo fabrica en el sótano y te lo sube listo.',
+                        serious: 'Unified skill creation: Modo Rápido (entrevista ligera + generación inmediata de SKILL.md) y Modo Avanzado (arquitectura completa con scripts, references, assets y empaquetado profesional según estándares Anthropic).',
+                        examples: ['Crear una skill nueva para automatizar reportes de ventas en Excel', 'Diseñar una skill con scripts Python reutilizables para procesamiento de imágenes', 'Construir una skill compleja con references, assets y progressive disclosure']
+                    }
+                ]
+            }
+        ];
+
+        const LEADERSHIP = [
+            {
+                name: 'El CEO', role: 'Aprobador Final (El Humano)', seed: 'ceo-boss-human', badge: '🏢', style: 'leadership',
+                quote: '¿Y si mejor lo hacemos distinto?',
+                bio: 'No sabe qué es un merge conflict pero te tumba el sprint a las 4:59pm del viernes. 3 monitores, solo usa uno para el correo.',
+                serious: 'El usuario humano. Tiene la última palabra en todo proyecto. El sistema está diseñado para consultarle en cada checkpoint crítico, respetando su naturaleza perfeccionista y co-creativa.',
+                examples: ['Aprobar o rechazar cada entregable', 'Definir el tono, audiencia y objetivos de cada proyecto', 'Iterar hasta que el resultado sea perfecto']
+            },
+            {
+                name: 'master-orchestrator', role: 'Project Manager Cafeinómano', seed: 'pm-coffee-gantt', badge: '☕', style: 'leadership',
+                quote: '¿Eso ya lo aprobó el CEO? ¿No? Entonces ni me hables.',
+                bio: 'Daily de 15 min que dura 47. Tinto cada 20 min. Si le entregas algo al 98%, te señala el 2% como si le hubieras matado el perro.',
+                serious: 'Orquestador maestro de proyectos multi-skill. Detecta complejidad (simple/media/compleja), selecciona el equipo de skills adecuado, planifica fases de ejecución y garantiza co-creación iterativa con el CEO.',
+                examples: ['Coordinar un proyecto de 3 entregables (DOCX + PPTX + Web) con 6 skills', 'Detectar que un proyecto simple no necesita planificación completa', 'Ejecutar retrospectiva post-proyecto y guardar lecciones aprendidas']
+            }
+        ];
+
+        const getAvatar = (emp) => {
+            const style = emp.style || FLOORS.find(f => f.employees.some(e => e.name === emp.name))?.avatarStyle || 'engineering';
+            return avatarStyles[style](emp.seed);
+        };
+
+        // ═══════════════════════════════════════
+        // COMPONENTS
+        // ═══════════════════════════════════════
+
+        const Modal = ({ emp, onClose }) => {
+            if (!emp) return null;
+            return (
+                <div className="modal-overlay" onClick={onClose}>
+                    <div className="modal-content fade-in" onClick={e => e.stopPropagation()}>
+                        <div className="flex justify-between items-start mb-4">
+                            <div className="flex items-center gap-4">
+                                <div className="avatar-ring" style={{ background: `linear-gradient(135deg, var(--neon), var(--amber))` }}>
+                                    <img src={getAvatar(emp)} alt={emp.name} style={{ width: '64px', height: '64px', minWidth: '64px' }} className="rounded-full bg-[var(--steel)] object-cover" />
+                                </div>
+                                <div>
+                                    <h3 className="text-xl font-bold text-[var(--neon)]">{emp.badge} {emp.name}</h3>
+                                    <p className="text-sm text-[var(--amber)]">{emp.role}</p>
+                                </div>
+                            </div>
+                            <button onClick={onClose} className="text-[var(--slate)] hover:text-[var(--neon)] text-2xl transition cursor-pointer">✕</button>
+                        </div>
+                        <div className="h-px bg-gradient-to-r from-[var(--neon)] via-transparent to-transparent mb-5 opacity-30"></div>
+
+                        <div className="mb-5">
+                            <h4 className="text-xs font-bold text-[var(--amber)] tracking-widest uppercase mb-2">Función</h4>
+                            <p className="text-[var(--clean)] text-sm leading-relaxed">{emp.serious}</p>
+                        </div>
+
+                        <div className="mb-5">
+                            <h4 className="text-xs font-bold text-[var(--amber)] tracking-widest uppercase mb-2">Ejemplos de Uso</h4>
+                            <ul className="space-y-2">
+                                {emp.examples?.map((ex, i) => (
+                                    <li key={i} className="flex items-start gap-2 text-sm text-[var(--slate)]">
+                                        <span className="text-[var(--neon)] mt-1 shrink-0">▸</span>
+                                        <span>{ex}</span>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+
+                        <div className="p-4 rounded-lg bg-[rgba(0,230,118,0.05)] border border-[rgba(0,230,118,0.1)]">
+                            <p className="text-sm italic text-[var(--clean)] opacity-70">"{emp.quote}"</p>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const Badge = ({ emp, onClick, large }) => (
+            <div className="glass-card p-5 cursor-pointer" onClick={() => onClick(emp)}>
+                <div className="flex items-start gap-4">
+                    <div className="avatar-ring shrink-0" style={{ background: `linear-gradient(135deg, var(--neon), var(--amber))` }}>
+                        <img src={getAvatar(emp)} alt={emp.name} style={{ width: large ? '64px' : '48px', height: large ? '64px' : '48px', minWidth: large ? '64px' : '48px' }} className="rounded-full bg-[var(--steel)] object-cover" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                        <h3 className={`font-bold text-[var(--neon)] ${large ? 'text-lg' : 'text-base'}`}>{emp.badge} {emp.name}</h3>
+                        <p className={`text-[var(--amber)] font-medium ${large ? 'text-sm' : 'text-xs'} mt-0.5`}>{emp.role}</p>
+                    </div>
+                </div>
+                <p className="text-[var(--clean)] opacity-70 text-sm mt-3 italic">"{emp.quote}"</p>
+                {large && <p className="text-[var(--slate)] text-sm mt-2 leading-relaxed">{emp.bio}</p>}
+                <div className="mt-3 text-xs text-[var(--neon)] opacity-50 hover:opacity-100 transition">Click para ver capacidades →</div>
+            </div>
+        );
+
+        const FloorBlock = ({ floor, onClick, isActive }) => (
+            <div onClick={onClick}
+                className={`floor-btn relative rounded-xl overflow-hidden mb-2 ${isActive ? 'ring-2 ring-[var(--neon)]' : ''}`}
+                style={{ background: `${floor.color}15`, borderLeftColor: floor.color }}>
+                <div className="px-5 py-4 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        <span className="text-2xl">{floor.emoji}</span>
+                        <div>
+                            <h3 className="font-bold text-[var(--clean)] text-sm">{floor.name}</h3>
+                            <p className="text-xs font-medium" style={{ color: floor.color }}>{floor.dept}</p>
+                        </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                        <div className="flex -space-x-2">
+                            {floor.employees.map((e, i) => (
+                                <img key={i} src={avatarStyles[floor.avatarStyle](e.seed)} style={{ width: '28px', height: '28px', minWidth: '28px' }} className="rounded-full border-2 border-[var(--dark)] bg-[var(--steel)] object-cover" title={e.name} />
+                            ))}
+                        </div>
+                        <div className="w-2 h-2 rounded-full pulse" style={{ background: floor.color }}></div>
+                    </div>
+                </div>
+            </div>
+        );
+
+        // ═══════════════════════════════════════
+        // ORG CHART
+        // ═══════════════════════════════════════
+        const OrgChart = ({ onSelect }) => {
+            const allAgents = [...LEADERSHIP, ...FLOORS.flatMap(f => f.employees.map(e => ({ ...e, floorColor: f.color, avatarStyle: f.avatarStyle })))];
+
+            const OrgNode = ({ emp, color, small }) => (
+                <div className="org-node flex flex-col items-center" onClick={() => onSelect(emp)}>
+                    <div className="avatar-ring" style={{ background: `linear-gradient(135deg, ${color || 'var(--neon)'}, var(--amber))` }}>
+                        <img src={getAvatar(emp)} style={{ width: small ? '40px' : '56px', height: small ? '40px' : '56px', minWidth: small ? '40px' : '56px' }} className="rounded-full bg-[var(--steel)] object-cover" />
+                    </div>
+                    <p className={`${small ? 'text-[10px]' : 'text-xs'} font-bold text-[var(--clean)] mt-1 text-center max-w-[90px] leading-tight`}>{emp.name}</p>
+                    <p className="text-[8px] text-[var(--slate)] text-center max-w-[100px]">{emp.role?.substring(0, 30)}</p>
+                </div>
+            );
+
+            return (
+                <div className="fade-in overflow-x-auto pb-4">
+                    <div className="min-w-[900px] flex flex-col items-center gap-2 py-6">
+                        {/* CEO */}
+                        <OrgNode emp={LEADERSHIP[0]} color="var(--amber)" />
+                        <div className="w-px h-6 bg-[var(--slate)] opacity-30"></div>
+                        {/* PM */}
+                        <OrgNode emp={LEADERSHIP[1]} color="var(--neon)" />
+                        <div className="w-px h-6 bg-[var(--slate)] opacity-30"></div>
+                        {/* Connector line */}
+                        <div className="h-px bg-[var(--slate)] opacity-30" style={{ width: '80%' }}></div>
+                        {/* Floors */}
+                        <div className="flex justify-between w-full px-4 gap-2">
+                            {FLOORS.map(f => (
+                                <div key={f.id} className="flex flex-col items-center gap-2 flex-1">
+                                    <div className="text-xs font-bold px-3 py-1.5 rounded-lg text-center" style={{ background: `${f.color}20`, color: f.color }}>
+                                        {f.emoji} {f.name}
+                                    </div>
+                                    <div className="w-px h-4 opacity-30" style={{ background: f.color }}></div>
+                                    <div className="flex flex-wrap justify-center gap-3">
+                                        {f.employees.map((e, i) => (
+                                            <OrgNode key={i} emp={e} color={f.color} small />
+                                        ))}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // ═══════════════════════════════════════
+        // MAIN APP
+        // ═══════════════════════════════════════
+        const App = () => {
+            const [activeFloor, setActiveFloor] = useState(null);
+            const [view, setView] = useState('building');
+            const [modalEmp, setModalEmp] = useState(null);
+            const [activeTab, setActiveTab] = useState('edificio');
+
+            return (
+                <div className="min-h-screen">
+                    {/* HEADER */}
+                    <header className="border-b border-[rgba(0,230,118,0.1)] bg-[rgba(13,13,26,0.85)] backdrop-blur-xl sticky top-0 z-50">
+                        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <div className="w-2.5 h-2.5 rounded-full bg-[var(--neon)] pulse"></div>
+                                <h1 className="text-2xl tracking-wide" style={{ fontFamily: 'Bebas Neue, sans-serif' }}>
+                                    <span className="text-[var(--clean)]">EL </span><span className="text-[var(--neon)]">CAMELLO</span>
+                                </h1>
+                                <span className="text-xs text-[var(--amber)] ml-2 hidden sm:inline font-medium">The Office, pero colombiano 🇨🇴</span>
+                            </div>
+                            <div className="flex items-center gap-4 text-xs text-[var(--slate)]">
+                                <span className="hidden sm:inline">16 AGENTES</span>
+                                <span className="text-[var(--neon)]">●</span>
+                                <span>EN LÍNEA</span>
+                            </div>
+                        </div>
+                        <div className="hyperloop-bar h-[2px] w-full opacity-30"></div>
+                    </header>
+
+                    <div className="max-w-7xl mx-auto px-6 py-8">
+                        {view === 'building' ? (
+                            <div className="fade-in">
+                                {/* HERO */}
+                                <div className="mb-10 max-w-3xl">
+                                    <h2 className="text-4xl md:text-5xl font-bold mb-4 leading-tight">
+                                        Bienvenido al <span className="text-[var(--neon)]">camello</span> donde ningún empleado pide vacaciones.
+                                    </h2>
+                                    <p className="text-[var(--slate)] text-lg leading-relaxed">
+                                        16 especialistas de IA organizados en 5 pisos. Un Project Manager adicto al tinto.
+                                        Un CEO que aprueba con el dedo índice. Y un Hyperloop de cafeína que lo conecta todo.
+                                    </p>
+                                </div>
+
+                                {/* TABS */}
+                                <div className="flex gap-1 mb-8 bg-[var(--card)] rounded-xl p-1.5 w-fit">
+                                    {[{ id: 'edificio', label: '🏢 El Edificio' }, { id: 'organigrama', label: '📐 Organigrama' }, { id: 'readme', label: '📖 Sobre El Camello' }].map(t => (
+                                        <button key={t.id} onClick={() => setActiveTab(t.id)}
+                                            className={`px-5 py-2.5 rounded-lg text-sm font-medium transition cursor-pointer ${activeTab === t.id ? 'bg-[var(--neon)] text-[var(--dark)]' : 'text-[var(--slate)] hover:text-[var(--clean)]'}`}>
+                                            {t.label}
+                                        </button>
+                                    ))}
+                                </div>
+
+                                {/* TAB: EDIFICIO */}
+                                {activeTab === 'edificio' && (
+                                    <div className="fade-in grid grid-cols-1 lg:grid-cols-5 gap-6">
+                                        <div className="lg:col-span-3">
+                                            <p className="text-xs text-[var(--amber)] font-bold tracking-widest uppercase mb-4">Click en un piso para explorar →</p>
+                                            {FLOORS.map(f => (
+                                                <FloorBlock key={f.id} floor={f} isActive={activeFloor?.id === f.id} onClick={() => { setActiveFloor(f); setView('floor') }} />
+                                            ))}
+                                            <div className="mt-2 px-5 py-3 rounded-xl flex items-center justify-between" style={{ background: 'rgba(0,230,118,0.05)', border: '1px solid rgba(0,230,118,0.1)' }}>
+                                                <div className="flex items-center gap-2">
+                                                    <span>🚄</span><span className="text-xs text-[var(--neon)] font-bold">HYPERLOOP</span>
+                                                </div>
+                                                <span className="text-xs text-[var(--slate)] italic">Operado con tinto y deadline anxiety</span>
+                                            </div>
+                                        </div>
+                                        <div className="lg:col-span-2 space-y-4">
+                                            <div className="glass-card p-6">
+                                                <h4 className="text-xs font-bold text-[var(--amber)] tracking-widest uppercase mb-4">Nota del Arquitecto</h4>
+                                                <p className="text-sm text-[var(--slate)] leading-relaxed mb-3">
+                                                    Este lugar empezó como un chatbot genérico y terminó siendo una fábrica con 16 empleados que no llegan tarde, no se quejan del aire, y no piden aumento.
+                                                </p>
+                                                <p className="text-sm text-[var(--clean)] leading-relaxed">
+                                                    No es un stack. <span className="text-[var(--neon)] font-bold">Es un departamento de producción completo. Y cabe en una laptop.</span>
+                                                </p>
+                                            </div>
+                                            <div className="glass-card p-6">
+                                                <h4 className="text-xs font-bold text-[var(--neon)] tracking-widest uppercase mb-3">Stack Final</h4>
+                                                <div className="space-y-2 text-sm">
+                                                    <p className="text-[var(--amber)] font-semibold">16 Skills · 5 Pisos · 1 PM Cafeinómano · 1 CEO Humano</p>
+                                                    {FLOORS.map(f => (
+                                                        <div key={f.id} className="flex items-center gap-2 text-[var(--slate)]">
+                                                            <span>{f.emoji}</span><span className="text-xs">{f.employees.map(e => e.name).join(', ')}</span>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* TAB: ORGANIGRAMA */}
+                                {activeTab === 'organigrama' && (
+                                    <div className="fade-in">
+                                        <div className="glass-card p-6 mb-4">
+                                            <h3 className="text-lg font-bold text-[var(--clean)] mb-1">Organigrama <span className="text-[var(--neon)]">El Camello</span></h3>
+                                            <p className="text-sm text-[var(--slate)]">Click en cualquier agente para ver sus capacidades reales y ejemplos de uso.</p>
+                                        </div>
+                                        <div className="glass-card p-4">
+                                            <OrgChart onSelect={setModalEmp} />
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* TAB: SOBRE EL CAMELLO */}
+                                {activeTab === 'readme' && (
+                                    <div className="fade-in max-w-4xl">
+                                        <div className="glass-card p-8 mb-6">
+                                            <h3 className="text-3xl font-bold mb-4" style={{ fontFamily: 'Bebas Neue, sans-serif' }}>
+                                                <span className="text-[var(--clean)]">¿Qué diablos es </span><span className="text-[var(--neon)]">El Camello</span><span className="text-[var(--clean)]">?</span>
+                                            </h3>
+                                            <p className="text-[var(--clean)] leading-relaxed mb-4">
+                                                Imagina que pudieras contratar 16 empleados que nunca llegan tarde, nunca piden aumento, nunca se enferman un lunes, y nunca — <em>jamás</em> — se quejan del aire acondicionado.
+                                            </p>
+                                            <p className="text-[var(--slate)] leading-relaxed mb-4">
+                                                <strong className="text-[var(--neon)]">El Camello</strong> es exactamente eso: un sistema de agentes de IA especializados, organizados como una oficina corporativa de 5 pisos, donde cada "empleado" es un módulo (<code className="text-[var(--amber)]">Skill</code>) con un rol específico, una personalidad definida, y la capacidad de ejecutar tareas profesionales complejas — desde crear un pitch deck para inversionistas hasta construir una webapp completa en React.
+                                            </p>
+                                            <p className="text-[var(--slate)] leading-relaxed">
+                                                Todo supervisado por un <strong className="text-[var(--amber)]">Project Manager cafeinómano</strong> que no te deja entregar nada mediocre, y un <strong className="text-[var(--amber)]">CEO humano</strong> (o sea tú) que aprueba cada entregable con el dedo índice.
+                                            </p>
+                                        </div>
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                                            <div className="glass-card p-5 text-center">
+                                                <p className="text-3xl mb-2">🏗️</p>
+                                                <p className="text-[var(--neon)] font-bold text-lg" style={{ fontFamily: 'Space Grotesk' }}>16 Skills</p>
+                                                <p className="text-[var(--slate)] text-xs mt-1">Cada una con su personalidad, superpoder y frase célebre</p>
+                                            </div>
+                                            <div className="glass-card p-5 text-center">
+                                                <p className="text-3xl mb-2">🚄</p>
+                                                <p className="text-[var(--amber)] font-bold text-lg" style={{ fontFamily: 'Space Grotesk' }}>Hyperloop</p>
+                                                <p className="text-[var(--slate)] text-xs mt-1">Las skills se comunican entre pisos sin fricción</p>
+                                            </div>
+                                            <div className="glass-card p-5 text-center">
+                                                <p className="text-3xl mb-2">☕</p>
+                                                <p className="text-[var(--clean)] font-bold text-lg" style={{ fontFamily: 'Space Grotesk' }}>Co-Creación</p>
+                                                <p className="text-[var(--slate)] text-xs mt-1">Nada sale del edificio sin la aprobación del CEO</p>
+                                            </div>
+                                        </div>
+                                        <div className="glass-card p-8">
+                                            <h4 className="text-xs font-bold text-[var(--amber)] tracking-widest uppercase mb-4">¿Cómo funciona?</h4>
+                                            <div className="space-y-4 text-sm">
+                                                <div className="flex items-start gap-3">
+                                                    <span className="text-[var(--neon)] font-bold shrink-0">01</span>
+                                                    <p className="text-[var(--clean)]"><strong>El CEO (tú)</strong> describe un proyecto. Puede ser un documento, una presentación, una webapp, un análisis de datos, o un combo de todo.</p>
+                                                </div>
+                                                <div className="flex items-start gap-3">
+                                                    <span className="text-[var(--neon)] font-bold shrink-0">02</span>
+                                                    <p className="text-[var(--clean)]"><strong>El PM (master-orchestrator)</strong> analiza la complejidad, selecciona las skills necesarias y propone un plan de ejecución para aprobación.</p>
+                                                </div>
+                                                <div className="flex items-start gap-3">
+                                                    <span className="text-[var(--neon)] font-bold shrink-0">03</span>
+                                                    <p className="text-[var(--clean)]"><strong>Las Skills ejecutan</strong> una por una, entregando checkpoints para que el CEO apruebe o itere cada componente.</p>
+                                                </div>
+                                                <div className="flex items-start gap-3">
+                                                    <span className="text-[var(--neon)] font-bold shrink-0">04</span>
+                                                    <p className="text-[var(--clean)]"><strong>QA + Retrospectiva.</strong> Se revisa la congruencia de marca y se puntúa el resultado. Las lecciones aprendidas se guardan para el siguiente proyecto.</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        ) : (
+                            /* FLOOR DETAIL */
+                            <div className="fade-in">
+                                <button onClick={() => { setView('building'); setActiveFloor(null) }} className="back-btn mb-8">
+                                    ◀ Volver al Camello
+                                </button>
+                                <div className="flex items-center gap-4 mb-2">
+                                    <span className="text-5xl">{activeFloor.emoji}</span>
+                                    <div>
+                                        <h2 className="text-3xl font-bold" style={{ color: activeFloor.color }}>
+                                            {activeFloor.name}: {activeFloor.dept}
+                                        </h2>
+                                        <p className="text-[var(--slate)] mt-1">{activeFloor.desc}</p>
+                                    </div>
+                                </div>
+                                <div className="h-1 rounded-full mt-3 mb-8" style={{ background: activeFloor.color, width: '140px' }}></div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    {activeFloor.employees.map((e, i) => <Badge key={i} emp={e} onClick={setModalEmp} large />)}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* FOOTER */}
+                    <footer className="border-t border-[rgba(0,230,118,0.08)] mt-20">
+                        <div className="max-w-7xl mx-auto px-6 py-8">
+                            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+                                <div className="text-center md:text-left">
+                                    <p className="text-sm text-[var(--clean)]">
+                                        <span className="text-[var(--neon)] font-bold">El Camello</span> · Donde la IA trabaja y el humano vibea.
+                                    </p>
+                                    <p className="text-xs text-[var(--slate)] mt-1">
+                                        Hecho con ☕, 🧠 y una cantidad cuestionable de <code className="text-[var(--amber)]">npm install</code>.
+                                    </p>
+                                </div>
+                                <div className="flex items-center gap-4 text-xs">
+                                    <span className="text-[var(--slate)]">Vibecodeado por:</span>
+                                    <a href="https://github.com/ingjaviergomezm" target="_blank" rel="noopener" className="flex items-center gap-1.5 text-[var(--clean)] hover:text-[var(--neon)] transition">
+                                        <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z" /></svg>
+                                        Javier Gómez
+                                    </a>
+                                    <span className="text-[var(--steel)]">×</span>
+                                    <a href="https://www.linkedin.com/in/jogomezm/" target="_blank" rel="noopener" className="flex items-center gap-1.5 text-[var(--clean)] hover:text-[var(--amber)] transition">
+                                        <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" /></svg>
+                                        in/jogomezm
+                                    </a>
+                                </div>
+                            </div>
+                            <p className="text-center text-[10px] text-[var(--slate)] mt-4 italic">
+                                "Ninguna IA fue maltratada durante la producción de este sitio. Bueno, quizás un poco." — El PM, tomando su tinto #47 del día ☕
+                            </p>
+                        </div>
+                    </footer>
+
+                    {/* MODAL */}
+                    {modalEmp && <Modal emp={modalEmp} onClose={() => setModalEmp(null)} />}
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+
+</html>
