@@ -77,32 +77,32 @@ Cuando le pides algo a Antigravity y coincide con una Skill instalada, él la le
 ### Piso 5 — Los Cerebritos de Ingeniería 🧠
 | Empleado | Qué hace | Ejemplo rápido |
 |----------|----------|----------------|
-| `mcp-builder` | Construye puentes entre la IA y APIs/DBs | *"Conectá mi app a mi base de datos de PostgreSQL"* |
-| `web-artifacts-builder` | Crea webapps completas en un solo archivo | *"Hacé un dashboard"* |
-| `webapp-testing` | QA automatizado con Playwright | *"Revisá que todos los botones funcionen"* |
-| `algorithmic-art` | Arte generativo con p5.js | *"Hacé un flow field interactivo"* |
+| `mcp-builder` | Construye puentes entre la IA y APIs/DBs | *"Conecta mi app a mi base de datos de PostgreSQL"* |
+| `web-artifacts-builder` | Crea webapps completas en un solo archivo | *"Haz un dashboard"* |
+| `webapp-testing` | QA automatizado con Playwright | *"Revisa que todos los botones funcionen"* |
+| `algorithmic-art` | Arte generativo con p5.js | *"Haz un flow field interactivo"* |
 
 ### Piso 4 — Los Diseñadores Hipsters 🎨
 | Empleado | Qué hace | Ejemplo rápido |
 |----------|----------|----------------|
-| `brand-father` | Define tu identidad visual (Brand Book) | *"Creá un Brand Book para mi startup"* |
-| `theme-factory` | 10 temas pre-diseñados profesionales | *"Aplicale un tema bonito a esta presentación"* |
-| `canvas-design` | Arte visual calidad museo | *"Diseñá un póster premium para mi evento"* |
+| `brand-father` | Define tu identidad visual (Brand Book) | *"Crea un Brand Book para mi startup"* |
+| `theme-factory` | 10 temas pre-diseñados profesionales | *"Aplícale un tema bonito a esta presentación"* |
+| `canvas-design` | Arte visual calidad museo | *"Diseña un póster premium para mi evento"* |
 
 ### Piso 3 — Los Geeks y Contadores 🤓
 | Empleado | Qué hace | Ejemplo rápido |
 |----------|----------|----------------|
-| `xlsx` | Excel avanzado: fórmulas, gráficos, limpieza | *"Limpiá este CSV de 50,000 registros"* |
-| `docx` | Word profesional con estilos reales | *"Generá un contrato con tabla de contenido"* |
-| `pptx` | Presentaciones nivel McKinsey | *"Armá un pitch deck de 15 slides"* |
-| `pdf` | Merge, split, OCR, watermarks | *"Combiná estos 10 PDFs y poneles watermark"* |
+| `xlsx` | Excel avanzado: fórmulas, gráficos, limpieza | *"Limpia este CSV de 50,000 registros"* |
+| `docx` | Word profesional con estilos reales | *"Genera un contrato con tabla de contenido"* |
+| `pptx` | Presentaciones nivel McKinsey | *"Arma un pitch deck de 15 slides"* |
+| `pdf` | Merge, split, OCR, watermarks | *"Combina estos 10 PDFs y ponles watermark"* |
 
 ### Piso 2 — Suite Ejecutiva 👔
 | Empleado | Qué hace | Ejemplo rápido |
 |----------|----------|----------------|
-| `reuniones-summary` | Transforma transcripciones en minutas | *"Resumí esta reunión de 1 hora"* |
-| `doc-coauthoring` | Co-creación iterativa de documentos | *"Ayudame a escribir un RFC técnico"* |
-| `internal-comms` | Comunicaciones corporativas | *"Redactá un 3P Update para el equipo"* |
+| `reuniones-summary` | Transforma transcripciones en minutas | *"Resume esta reunión de 1 hora"* |
+| `doc-coauthoring` | Co-creación iterativa de documentos | *"Ayúdame a escribir un RFC técnico"* |
+| `internal-comms` | Comunicaciones corporativas | *"Redacta un 3P Update para el equipo"* |
 
 ### Piso 1 — Recursos Humanos 🏗️
 | Empleado | Qué hace | Ejemplo rápido |
@@ -123,12 +123,12 @@ Con El Camello:
 ```
 Tú: "Necesito un reporte en Word, una presentación, y subirlo a la web."
 PM: Detectado proyecto complejo. Equipo: docx + pptx + web-artifacts-builder.
-PM: Plan de 3 fases. ¿Aprobás, CEO?
+PM: Plan de 3 fases. ¿Apruebas, CEO?
 Tú: Dale.
 [15 minutos después, todo entregado con QA incluido]
 ```
 
-El orquestador **detecta la complejidad**, **selecciona las Skills necesarias**, y **ejecuta las fases** pidiéndote aprobación en cada checkpoint. Vos solo aprobás o iterás.
+El orquestador **detecta la complejidad**, **selecciona las Skills necesarias**, y **ejecuta las fases** pidiéndote aprobación en cada checkpoint. Tú solo apruebas o iteras.
 
 ---
 
@@ -142,7 +142,7 @@ El orquestador **detecta la complejidad**, **selecciona las Skills necesarias**,
 
 ### Paso 1: Habilitar acceso a archivos
 
-Abrí Antigravity y andá a **Settings** (la tuerca ⚙️):
+Abre Antigravity y ve a **Settings** (la tuerca ⚙️):
 
 ```
 Agent Non-Workspace File Access → ✅ HABILITADO
@@ -152,7 +152,7 @@ Agent Non-Workspace File Access → ✅ HABILITADO
 
 ### Paso 2: Configurar la estructura
 
-Las Skills van en esta ruta específica. **Esto es sagrado, no lo cambies:**
+Las Skills van en esta ruta específica. **Esto es sagrado, no lo toques:**
 
 ```
 ~/.gemini/antigravity/
@@ -198,7 +198,7 @@ Las Skills van en esta ruta específica. **Esto es sagrado, no lo cambies:**
 
 ### Paso 3: Copiar y pegar — ¡Voilá!
 
-Abrí Antigravity (Ctrl+Shift+P → "Antigravity: Open") y pegá este prompt:
+Abre Antigravity (Ctrl+Shift+P → "Antigravity: Open") y pega este prompt:
 
 ```
 Necesito que instales el sistema de Skills "El Camello" en mi entorno.
@@ -209,7 +209,7 @@ Necesito que instales el sistema de Skills "El Camello" en mi entorno.
 4. El orquestador principal es `master-orchestrator/SKILL.md`
 5. Habilita "Agent Non-Workspace File Access" si no está habilitado
 
-Una vez instalado, preguntame qué proyecto quiero hacer.
+Una vez instalado, pregúntame qué proyecto quiero hacer.
 Tú eres el PM. Yo soy el CEO. Nadie se mueve sin mi aprobación. ☕
 ```
 
@@ -217,16 +217,16 @@ Tú eres el PM. Yo soy el CEO. Nadie se mueve sin mi aprobación. ☕
 
 ---
 
-## 🎮 Primeras pruebas — Ponelo a trabajar
+## 🎮 Primeras pruebas — Ponlo a trabajar
 
-Una vez instalado, probá estos comandos para ver a los empleados en acción:
+Una vez instalado, prueba estos comandos para ver a los empleados en acción:
 
 ### Test rápido (1 skill)
 ```
-"Creá un archivo Excel con los meses del año, un presupuesto de ejemplo
-y un gráfico de barras. Ponelo bonito."
+"Crea un archivo Excel con los meses del año, un presupuesto de ejemplo
+y un gráfico de barras. Ponlo bonito."
 ```
-→ El `xlsx` del Piso 3 se activa. Si tenés un Brand Book, lo respeta.
+→ El `xlsx` del Piso 3 se activa. Si tienes un Brand Book, lo respeta.
 
 ### Test complejo (multi-skill)
 ```
@@ -238,24 +238,24 @@ y una landing page simple para compartirlo con el equipo."
 
 ### Test de diseño
 ```
-"Creá un Brand Book para mi empresa 'TechVerde'.
+"Crea un Brand Book para mi empresa 'TechVerde'.
 Colores: verdes y grises. Tipografía moderna."
 ```
-→ El `brand-father` del Piso 4 te entrevista, crea el Brand Book, y a partir de ahí TODOS los documentos respetan tu marca.
+→ El `brand-father` del Piso 4 te entrevista, crea el Brand Book, y de ahí en adelante TODOS los documentos respetan tu marca.
 
 ---
 
 ## 🧠 Tips del CEO veterano
 
-1. **"El PM es tu aliado, no tu enemigo."** Si te pide aprobación, es porque quiere que el resultado sea bueno. Aprobá rápido o iterá con feedback concreto.
+1. **"El PM es tu aliado, no tu enemigo."** Si te pide aprobación, es porque quiere que el resultado sea bueno. Aprueba rápido o itera con feedback concreto.
 
-2. **"Las Skills se descubren solas."** No necesitás invocarlas manualmente. Solo pedí lo que necesitás y Antigravity encuentra la Skill correcta.
+2. **"Las Skills se descubren solas."** No necesitas invocarlas manualmente. Solo pide lo que necesitas y Antigravity encuentra la Skill correcta.
 
-3. **"Brand First."** Si creás un Brand Book primero, TODOS los documentos posteriores respetarán tu identidad visual automáticamente. Es como vestir la oficina con tu logo.
+3. **"Brand First."** Si creas un Brand Book primero, TODOS los documentos posteriores respetarán tu identidad visual automáticamente. Es como vestir la oficina con tu logo.
 
-4. **"Si no existe el empleado, créalo."** El `skill-forge` del Piso 1 puede fabricar Skills nuevas en minutos. ¿Necesitás un agente que genere facturas? Pedíselo.
+4. **"Si no existe el empleado, créalo."** El `skill-forge` del Piso 1 puede fabricar Skills nuevas en minutos. ¿Necesitas un agente que genere facturas? Pídeselo.
 
-5. **"Revisá el organigrama."** Si no sabés qué agente hace qué, abrí la [demo interactiva](https://ingjaviergomezm.github.io/el-camello/) y hacé click en el tab "Organigrama".
+5. **"Revisa el organigrama."** Si no sabes qué agente hace qué, abre la [demo interactiva](https://ingjaviergomezm.github.io/el-camello/) y haz click en el tab "Organigrama".
 
 ---
 
@@ -297,4 +297,4 @@ el-camello/
 
 ## 📄 Licencia
 
-MIT — Usalo, modifícalo, revendélo, regalálo. Solo no digas que hiciste todo solo. 😉
+MIT — Úsalo, modifícalo, revéndelo, regálalo. Solo no digas que lo hiciste solo. 😉
