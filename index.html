@@ -224,6 +224,99 @@
             padding: 3px;
             display: inline-block
         }
+
+        /* Tab buttons - visible on mobile */
+        .tab-btn {
+            padding: 10px 18px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all .3s;
+            border: 1px solid rgba(0, 230, 118, .15);
+            background: rgba(30, 30, 48, .6);
+            color: var(--slate);
+        }
+
+        .tab-btn:hover {
+            border-color: rgba(0, 230, 118, .4);
+            color: var(--clean);
+        }
+
+        .tab-btn.active {
+            background: var(--neon);
+            color: var(--dark);
+            border-color: var(--neon);
+            box-shadow: 0 0 16px rgba(0, 230, 118, .3);
+        }
+
+        /* Capabilities pill */
+        .cap-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 12px;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            background: rgba(0, 230, 118, .1);
+            border: 1px solid rgba(0, 230, 118, .3);
+            color: var(--neon);
+            cursor: pointer;
+            transition: all .3s;
+        }
+
+        .cap-pill:hover {
+            background: rgba(0, 230, 118, .2);
+            box-shadow: 0 0 12px rgba(0, 230, 118, .25);
+            transform: translateY(-1px);
+        }
+
+        /* Floating back button */
+        .floating-back {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 90;
+            padding: 12px 28px;
+            border-radius: 50px;
+            background: var(--dark);
+            border: 2px solid var(--neon);
+            color: var(--neon);
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all .3s;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, .5), 0 0 20px rgba(0, 230, 118, .15);
+            backdrop-filter: blur(10px);
+        }
+
+        .floating-back:hover {
+            background: var(--neon);
+            color: var(--dark);
+            box-shadow: 0 0 30px rgba(0, 230, 118, .4);
+        }
+
+        /* Org chart mobile accordion */
+        .org-floor-card {
+            background: rgba(30, 30, 48, .8);
+            border: 1px solid rgba(0, 230, 118, .08);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all .3s;
+            cursor: pointer;
+        }
+
+        .org-floor-card:hover {
+            border-color: rgba(0, 230, 118, .2);
+        }
+
+        .org-floor-card.expanded {
+            border-color: rgba(0, 230, 118, .3);
+            box-shadow: 0 4px 20px rgba(0, 230, 118, .08);
+        }
     </style>
 </head>
 
@@ -519,7 +612,9 @@
                 </div>
                 <p className="text-[var(--clean)] opacity-70 text-sm mt-3 italic">"{emp.quote}"</p>
                 {large && <p className="text-[var(--slate)] text-sm mt-2 leading-relaxed">{emp.bio}</p>}
-                <div className="mt-3 text-xs text-[var(--neon)] opacity-50 hover:opacity-100 transition">Click para ver capacidades →</div>
+                <div className="cap-pill">
+                    <span>⚡</span> Ver capacidades
+                </div>
             </div>
         );
 
@@ -596,6 +691,56 @@
         };
 
         // ═══════════════════════════════════════
+        // ORG ACCORDION (MOBILE-FRIENDLY)
+        // ═══════════════════════════════════════
+        const OrgAccordion = ({ onSelect }) => {
+            const [expandedFloor, setExpandedFloor] = useState(null);
+
+            return (
+                <div className="space-y-3">
+                    {FLOORS.map(f => {
+                        const isOpen = expandedFloor === f.id;
+                        return (
+                            <div key={f.id} className={`org-floor-card ${isOpen ? 'expanded' : ''}`}>
+                                <div className="px-5 py-4 flex items-center justify-between"
+                                    onClick={() => setExpandedFloor(isOpen ? null : f.id)}>
+                                    <div className="flex items-center gap-3">
+                                        <span className="text-2xl">{f.emoji}</span>
+                                        <div>
+                                            <h4 className="font-bold text-sm text-[var(--clean)]">{f.name}</h4>
+                                            <p className="text-xs font-medium" style={{ color: f.color }}>{f.dept}</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-3">
+                                        <span className="text-xs text-[var(--slate)]">{f.employees.length} agentes</span>
+                                        <span className={`text-[var(--neon)] transition-transform ${isOpen ? 'rotate-180' : ''}`} style={{ display: 'inline-block', transition: 'transform .3s' }}>▼</span>
+                                    </div>
+                                </div>
+                                {isOpen && (
+                                    <div className="px-5 pb-5 pt-1 border-t border-[rgba(0,230,118,.08)]">
+                                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 mt-3">
+                                            {f.employees.map((e, i) => (
+                                                <div key={i} className="flex flex-col items-center p-3 rounded-xl bg-[rgba(0,0,0,.2)] cursor-pointer hover:bg-[rgba(0,230,118,.05)] transition"
+                                                    onClick={(ev) => { ev.stopPropagation(); onSelect(e); }}>
+                                                    <div className="avatar-ring" style={{ background: `linear-gradient(135deg, ${f.color}, var(--amber))` }}>
+                                                        <img src={avatarStyles[f.avatarStyle](e.seed)} style={{ width: '44px', height: '44px', minWidth: '44px' }} className="rounded-full bg-[var(--steel)] object-cover" />
+                                                    </div>
+                                                    <p className="text-[11px] font-bold text-[var(--clean)] mt-2 text-center leading-tight">{e.badge} {e.name}</p>
+                                                    <p className="text-[9px] text-[var(--slate)] text-center mt-0.5">{e.role.substring(0, 25)}{e.role.length > 25 ? '...' : ''}</p>
+                                                    <div className="cap-pill mt-2" style={{ fontSize: '9px', padding: '3px 8px', marginTop: '6px' }}>⚡ Ver</div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        );
+                    })}
+                </div>
+            );
+        };
+
+        // ═══════════════════════════════════════
         // MAIN APP
         // ═══════════════════════════════════════
         const App = () => {
@@ -640,10 +785,10 @@
                                 </div>
 
                                 {/* TABS */}
-                                <div className="flex gap-1 mb-8 bg-[var(--card)] rounded-xl p-1.5 w-fit">
+                                <div className="flex gap-2 mb-8 flex-wrap">
                                     {[{ id: 'edificio', label: '🏢 El Edificio' }, { id: 'organigrama', label: '📐 Organigrama' }, { id: 'readme', label: '📖 Sobre El Camello' }].map(t => (
                                         <button key={t.id} onClick={() => setActiveTab(t.id)}
-                                            className={`px-5 py-2.5 rounded-lg text-sm font-medium transition cursor-pointer ${activeTab === t.id ? 'bg-[var(--neon)] text-[var(--dark)]' : 'text-[var(--slate)] hover:text-[var(--clean)]'}`}>
+                                            className={`tab-btn ${activeTab === t.id ? 'active' : ''}`}>
                                             {t.label}
                                         </button>
                                     ))}
@@ -694,11 +839,24 @@
                                     <div className="fade-in">
                                         <div className="glass-card p-6 mb-4">
                                             <h3 className="text-lg font-bold text-[var(--clean)] mb-1">Organigrama <span className="text-[var(--neon)]">El Camello</span></h3>
-                                            <p className="text-sm text-[var(--slate)]">Click en cualquier agente para ver sus capacidades reales y ejemplos de uso.</p>
+                                            <p className="text-sm text-[var(--slate)]">Toca un piso para expandirlo. Toca un agente para ver sus capacidades.</p>
                                         </div>
-                                        <div className="glass-card p-4">
-                                            <OrgChart onSelect={setModalEmp} />
+                                        {/* Leadership at top */}
+                                        <div className="grid grid-cols-2 gap-3 mb-4">
+                                            {LEADERSHIP.map((l, i) => (
+                                                <div key={i} className="org-floor-card p-4 flex flex-col items-center" onClick={() => setModalEmp(l)}>
+                                                    <div className="avatar-ring" style={{ background: `linear-gradient(135deg, ${i === 0 ? 'var(--amber)' : 'var(--neon)'}, var(--amber))` }}>
+                                                        <img src={getAvatar(l)} style={{ width: '48px', height: '48px', minWidth: '48px' }} className="rounded-full bg-[var(--steel)] object-cover" />
+                                                    </div>
+                                                    <p className="text-xs font-bold text-[var(--clean)] mt-2 text-center">{l.badge} {l.name}</p>
+                                                    <p className="text-[10px] text-[var(--slate)] text-center">{l.role}</p>
+                                                    <div className="cap-pill mt-2" style={{ fontSize: '10px', padding: '4px 10px' }}>⚡ Ver</div>
+                                                </div>
+                                            ))}
                                         </div>
+                                        <div className="w-px h-4 bg-[var(--slate)] opacity-30 mx-auto mb-4"></div>
+                                        {/* Floors as accordion */}
+                                        <OrgAccordion onSelect={setModalEmp} />
                                     </div>
                                 )}
 
@@ -763,7 +921,7 @@
                         ) : (
                             /* FLOOR DETAIL */
                             <div className="fade-in">
-                                <button onClick={() => { setView('building'); setActiveFloor(null) }} className="back-btn mb-8">
+                                <button onClick={() => { setView('building'); setActiveFloor(null) }} className="floating-back">
                                     ◀ Volver al Camello
                                 </button>
                                 <div className="flex items-center gap-4 mb-2">
