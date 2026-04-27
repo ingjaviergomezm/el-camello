@@ -69,6 +69,70 @@ Unless otherwise stated by the user or existing template
 
 A user may ask you to create, edit, or analyze the contents of an .xlsx file. You have different tools and workflows available for different tasks.
 
+---
+
+## 🚨 REGLA CRÍTICA (IP-005): Archivos Excel Complejos → `win32com` OBLIGATORIO
+
+**Antes de elegir herramienta, clasifica el archivo:**
+
+| Tipo de archivo | Herramienta permitida |
+|-----------------|-----------------------|
+| Simple: datos, fórmulas básicas, sin imágenes | `openpyxl` o `pandas` |
+| **Complejo: logos, firmas, macros, múltiples hojas con formato avanzado, modelos financieros** | **`win32com` ÚNICAMENTE** |
+
+### ¿Qué es un archivo "complejo"?
+- Contiene logos, imágenes embebidas o firmas digitales
+- Tiene macros o VBA
+- Tiene más de ~5 hojas con formato avanzado
+- Es un modelo financiero con plantilla corporativa
+- Tiene objetos flotantes, gráficos embebidos o formas
+- El usuario lo llama "plantilla" o "modelo" con revisiones (Rev1, Rev2…)
+
+### ¿Por qué?
+`openpyxl` puede corromper el XML interno de Excel cuando maneja workbooks complejos, causando **pérdida irreversible de imágenes, firmas y referencias** (Lección aprendida: IP-005 / KI: excel_integrity_win32com).
+
+### Cómo usar `win32com` en Windows:
+```python
+import win32com.client
+import os
+
+excel = win32com.client.Dispatch("Excel.Application")
+excel.Visible = False
+excel.DisplayAlerts = False
+
+wb = excel.Workbooks.Open(os.path.abspath("archivo.xlsx"))
+ws = wb.Worksheets("NombreHoja")  # o wb.Worksheets(1)
+
+# Modificar celdas
+ws.Range("B5").Value = "Nuevo valor"
+ws.Range("C10").Formula = "=SUM(C2:C9)"
+
+wb.Save()
+wb.Close()
+excel.Quit()
+```
+
+---
+
+## 🔒 REGLA CRÍTICA (IP-006): Blindar Hojas Críticas en Modelos Financieros
+
+Cuando el usuario indica explícitamente que ciertas hojas o rangos **no deben tocarse** (ej. "no modificar volúmenes", "no tocar AIU", "no cambiar la hoja de supuestos"):
+
+1. **Listar las hojas/rangos protegidos ANTES de escribir código**
+2. **Verificar que ninguna fórmula ni script toca esas zonas**, aunque parezcan dependencias lógicas
+3. **Reportar al usuario** si hay una dependencia que requeriría tocarlas — nunca asumir permiso
+4. Documentar en comentarios del código cuáles hojas están blindadas
+
+```python
+# Ejemplo de protección explícita en win32com
+HOJAS_BLINDADAS = ["Volúmenes", "AIU", "Supuestos"]
+
+for nombre_hoja in HOJAS_BLINDADAS:
+    assert nombre_hoja not in hojas_a_modificar, f"⛔ VIOLACIÓN IP-006: No está permitido modificar '{nombre_hoja}'"
+```
+
+---
+
 ## Important Requirements
 
 **LibreOffice Required for Formula Recalculation**: You can assume LibreOffice is installed for recalculating formula values using the `scripts/recalc.py` script. The script automatically configures LibreOffice on first run, including in sandboxed environments where Unix sockets are restricted (handled by `scripts/office/soffice.py`)
@@ -130,7 +194,9 @@ sheet['D20'] = '=AVERAGE(D2:D19)'
 This applies to ALL calculations - totals, percentages, ratios, differences, etc. The spreadsheet should be able to recalculate when source data changes.
 
 ## Common Workflow
-1. **Choose tool**: pandas for data, openpyxl for formulas/formatting
+1. **Choose tool** (ver clasificación IP-005 arriba):
+   - Archivo **simple** → `pandas` para datos, `openpyxl` para fórmulas/formato
+   - Archivo **complejo** (logos, macros, plantilla corporativa) → **`win32com` OBLIGATORIO**
 2. **Create/Load**: Create new workbook or load existing file
 3. **Modify**: Add/edit data, formulas, and formatting
 4. **Save**: Write to file
