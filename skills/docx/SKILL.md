@@ -288,6 +288,40 @@ sections: [{
 
 ## Editing Existing Documents
 
+---
+
+### 🚨 REGLA CRÍTICA (IP-003): NUNCA Reconstruir Desde Cero
+
+**Cuando el documento tiene plantilla formateada, estilos corporativos, logos, firmas o estructura heredada:**
+
+- ❌ **PROHIBIDO**: Crear un nuevo documento con `docx-js` o `python-docx` desde cero y "rellenar" el contenido
+- ❌ **PROHIBIDO**: Usar `python-docx` para reescribir un documento que ya tiene estilos establecidos
+- ✅ **OBLIGATORIO**: Desempaquetar el XML original → editar nodos → reempaquetar
+
+**¿Por qué?** Reconstruir desde cero destruye estilos, numeración, formato de plantilla y puede corromper la estructura del documento. El texto nuevo hereda o rompe el formato existente de formas impredecibles.
+
+### ⚠️ Errores Conocidos en Plantillas Formateadas (PHVA Troubleshooting)
+
+Antes de editar un documento con plantilla, consulta estas entradas documentadas:
+
+| ID | Riesgo | Síntoma |
+|----|--------|---------|
+| **DOC-001** | `Find.Execute(Replace=2)` retorna `True` pero no cambia nada | El texto no se sustituye en plantillas con estilos complejos |
+| **DOC-002** | Texto nuevo hereda `Font.Size = 9999999`, Raleway, JUSTIFY de la plantilla | El párrafo insertado parece con formato correcto pero en realidad hereda el estilo base |
+| **DOC-003** | Párrafo cae en zona de footer/pie de página (Raleway 10.5pt) | `InsertParagraphAfter` ubica el contenido fuera del cuerpo del documento |
+
+**Solución universal para DOC-002 y DOC-003:** Siempre forzar el reset de formato después de insertar:
+```python
+# win32com: limpiar formato heredado de la plantilla
+para = rng.Paragraphs(1)
+para.Range.Font.Size = 11  # Forzar tamaño explícito
+para.Range.Font.Name = "Times New Roman"  # Forzar fuente
+para.Range.ParagraphFormat.Alignment = 3  # wdAlignParagraphJustify
+para.Range.ParagraphFormat.SpaceAfter = 0
+```
+
+---
+
 **Follow all 3 steps in order.**
 
 ### Step 1: Unpack
